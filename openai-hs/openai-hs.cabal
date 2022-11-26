@@ -47,6 +47,7 @@ library
       ScopedTypeVariables
       DeriveGeneric
       DeriveFunctor
+      CPP
   ghc-options: -Wall -fwarn-tabs -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates
   build-depends:
       aeson

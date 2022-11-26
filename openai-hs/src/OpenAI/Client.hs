@@ -1,6 +1,3 @@
-{-# LANGUAGE CPP #-}
-{-# OPTIONS_GHC -cpp -pgmPcpphs -optP--cpp #-}
-
 module OpenAI.Client
   ( -- * Basics
     ApiKey,
@@ -104,33 +101,48 @@ api = Proxy
 openaiBaseUrl :: BaseUrl
 openaiBaseUrl = BaseUrl Https "api.openai.com" 443 ""
 
-#define EP0(N, R) \
-    N##' :: BasicAuthData -> ClientM R;\
-    N :: OpenAIClient -> IO (Either ClientError R);\
-    N sc = runRequest (scMaxRetries sc) 0 $ runClientM (N##' (scBasicAuthData sc)) (mkClientEnv (scManager sc) openaiBaseUrl)
 
-#define EP(N, ARG, R) \
-    N##' :: BasicAuthData -> ARG -> ClientM R;\
-    N :: OpenAIClient -> ARG -> IO (Either ClientError R);\
-    N sc a = runRequest (scMaxRetries sc) 0 $ runClientM (N##' (scBasicAuthData sc) a) (mkClientEnv (scManager sc) openaiBaseUrl)
 
-#define EP2(N, ARG, ARG2, R) \
-    N##' :: BasicAuthData -> ARG -> ARG2 -> ClientM R;\
-    N :: OpenAIClient -> ARG -> ARG2 -> IO (Either ClientError R);\
-    N sc a b = runRequest (scMaxRetries sc) 0 $ runClientM (N##' (scBasicAuthData sc) a b) (mkClientEnv (scManager sc) openaiBaseUrl)
 
-EP2 (completeText, EngineId, TextCompletionCreate, TextCompletion)
-EP2 (searchDocuments, EngineId, SearchResultCreate, (OpenAIList SearchResult))
-EP2 (createEmbedding, EngineId, EmbeddingCreate, (OpenAIList Embedding))
+completeText' :: BasicAuthData ->  EngineId ->  TextCompletionCreate -> ClientM  TextCompletion
+completeText :: OpenAIClient ->  EngineId ->  TextCompletionCreate -> IO (Either ClientError  TextCompletion)
+completeText sc a b = runRequest (scMaxRetries sc) 0 $ runClientM (completeText' (scBasicAuthData sc) a b) (mkClientEnv (scManager sc) openaiBaseUrl)
 
-EP (createFineTune, FineTuneCreate, FineTune)
-EP0 (listFineTunes, (OpenAIList FineTune))
-EP (getFineTune, FineTuneId, FineTune)
-EP (cancelFineTune, FineTuneId, FineTune)
-EP (listFineTuneEvents, FineTuneId, (OpenAIList FineTuneEvent))
+searchDocuments' :: BasicAuthData ->  EngineId ->  SearchResultCreate -> ClientM  (OpenAIList SearchResult)
+searchDocuments :: OpenAIClient ->  EngineId ->  SearchResultCreate -> IO (Either ClientError  (OpenAIList SearchResult))
+searchDocuments sc a b = runRequest (scMaxRetries sc) 0 $ runClientM (searchDocuments' (scBasicAuthData sc) a b) (mkClientEnv (scManager sc) openaiBaseUrl)
 
-EP0 (listEngines, (OpenAIList Engine))
-EP (getEngine, EngineId, Engine)
+createEmbedding' :: BasicAuthData ->  EngineId ->  EmbeddingCreate -> ClientM  (OpenAIList Embedding)
+createEmbedding :: OpenAIClient ->  EngineId ->  EmbeddingCreate -> IO (Either ClientError  (OpenAIList Embedding))
+createEmbedding sc a b = runRequest (scMaxRetries sc) 0 $ runClientM (createEmbedding' (scBasicAuthData sc) a b) (mkClientEnv (scManager sc) openaiBaseUrl)
+
+createFineTune' :: BasicAuthData ->  FineTuneCreate -> ClientM  FineTune
+createFineTune :: OpenAIClient ->  FineTuneCreate -> IO (Either ClientError  FineTune)
+createFineTune sc a = runRequest (scMaxRetries sc) 0 $ runClientM (createFineTune' (scBasicAuthData sc) a) (mkClientEnv (scManager sc) openaiBaseUrl)
+
+listFineTunes' :: BasicAuthData -> ClientM  (OpenAIList FineTune)
+listFineTunes :: OpenAIClient -> IO (Either ClientError  (OpenAIList FineTune))
+listFineTunes sc = runRequest (scMaxRetries sc) 0 $ runClientM (listFineTunes' (scBasicAuthData sc)) (mkClientEnv (scManager sc) openaiBaseUrl)
+
+getFineTune' :: BasicAuthData ->  FineTuneId -> ClientM  FineTune
+getFineTune :: OpenAIClient ->  FineTuneId -> IO (Either ClientError  FineTune)
+getFineTune sc a = runRequest (scMaxRetries sc) 0 $ runClientM (getFineTune' (scBasicAuthData sc) a) (mkClientEnv (scManager sc) openaiBaseUrl)
+
+cancelFineTune' :: BasicAuthData ->  FineTuneId -> ClientM  FineTune
+cancelFineTune :: OpenAIClient ->  FineTuneId -> IO (Either ClientError  FineTune)
+cancelFineTune sc a = runRequest (scMaxRetries sc) 0 $ runClientM (cancelFineTune' (scBasicAuthData sc) a) (mkClientEnv (scManager sc) openaiBaseUrl)
+
+listFineTuneEvents' :: BasicAuthData ->  FineTuneId -> ClientM  (OpenAIList FineTuneEvent)
+listFineTuneEvents :: OpenAIClient ->  FineTuneId -> IO (Either ClientError  (OpenAIList FineTuneEvent))
+listFineTuneEvents sc a = runRequest (scMaxRetries sc) 0 $ runClientM (listFineTuneEvents' (scBasicAuthData sc) a) (mkClientEnv (scManager sc) openaiBaseUrl)
+
+listEngines' :: BasicAuthData -> ClientM  (OpenAIList Engine)
+listEngines :: OpenAIClient -> IO (Either ClientError  (OpenAIList Engine))
+listEngines sc = runRequest (scMaxRetries sc) 0 $ runClientM (listEngines' (scBasicAuthData sc)) (mkClientEnv (scManager sc) openaiBaseUrl)
+
+getEngine' :: BasicAuthData ->  EngineId -> ClientM  Engine
+getEngine :: OpenAIClient ->  EngineId -> IO (Either ClientError  Engine)
+getEngine sc a = runRequest (scMaxRetries sc) 0 $ runClientM (getEngine' (scBasicAuthData sc) a) (mkClientEnv (scManager sc) openaiBaseUrl)
 
 createFile :: OpenAIClient -> FileCreate -> IO (Either ClientError File)
 createFile sc rfc =
@@ -138,10 +150,18 @@ createFile sc rfc =
     bnd <- MP.genBoundary
     createFileInternal sc (bnd, rfc)
 
-EP (createFileInternal, (BSL.ByteString, FileCreate), File)
-EP (deleteFile, FileId, FileDeleteConfirmation)
+createFileInternal' :: BasicAuthData ->  (BSL.ByteString, FileCreate) -> ClientM  File
+createFileInternal :: OpenAIClient ->  (BSL.ByteString, FileCreate) -> IO (Either ClientError  File)
+createFileInternal sc a = runRequest (scMaxRetries sc) 0 $ runClientM (createFileInternal' (scBasicAuthData sc) a) (mkClientEnv (scManager sc) openaiBaseUrl)
 
-EP (getAnswer, AnswerReq, AnswerResp)
+deleteFile' :: BasicAuthData ->  FileId -> ClientM  FileDeleteConfirmation
+deleteFile :: OpenAIClient ->  FileId -> IO (Either ClientError  FileDeleteConfirmation)
+deleteFile sc a = runRequest (scMaxRetries sc) 0 $ runClientM (deleteFile' (scBasicAuthData sc) a) (mkClientEnv (scManager sc) openaiBaseUrl)
+
+getAnswer' :: BasicAuthData ->  AnswerReq -> ClientM  AnswerResp
+getAnswer :: OpenAIClient ->  AnswerReq -> IO (Either ClientError  AnswerResp)
+getAnswer sc a = runRequest (scMaxRetries sc) 0 $ runClientM (getAnswer' (scBasicAuthData sc) a) (mkClientEnv (scManager sc) openaiBaseUrl)
+
 
 ( listEngines'
     :<|> getEngine'
